@@ -1,0 +1,39 @@
+<?php
+include "config.php";
+
+$title = $_POST['title'] ?? "";
+$summary = $_POST['summary'] ?? "";
+$description = $_POST['description'] ?? "";
+
+// Handle image
+$imageName = null;
+
+if (isset($_FILES["image"])) {
+    $targetDir = "./uploads/";
+
+    if (!is_dir($targetDir)) {
+        mkdir($targetDir, 0777, true);
+    }
+
+    $ext = pathinfo($_FILES["image"]["name"], PATHINFO_EXTENSION);
+    $imageName = uniqid() . "." . $ext;
+
+    $targetFile = $targetDir . $imageName;
+
+    move_uploaded_file($_FILES["image"]["tmp_name"], $targetFile);
+}
+
+// Insert into DB
+$stmt = $conn->prepare("INSERT INTO blogs (title, summary, description, image) VALUES (?, ?, ?, ?)");
+$stmt->bind_param("ssss", $title, $summary, $description, $imageName);
+
+if ($stmt->execute()) {
+    echo json_encode([
+        "message" => "Blog added",
+        "id" => $stmt->insert_id,
+        "image" => $imageName
+    ]);
+} else {
+    echo json_encode(["error" => "Insert failed"]);
+}
+?>
