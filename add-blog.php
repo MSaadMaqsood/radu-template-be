@@ -7,9 +7,9 @@ if (!verify_recaptcha($_POST['recaptcha_token'] ?? '')) {
     exit;
 }
 
-$title = $_POST['title'] ?? "";
-$summary = $_POST['summary'] ?? "";
-$description = $_POST['description'] ?? "";
+$title       = sanitize_text($_POST['title']       ?? "");
+$summary     = sanitize_text($_POST['summary']     ?? "");
+$description = sanitize_html($_POST['description'] ?? "");
 
 // Handle image
 $imageName = null;

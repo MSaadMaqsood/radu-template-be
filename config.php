@@ -45,6 +45,17 @@ function rate_limit(int $max = 30, int $window = 60): void {
     file_put_contents($file, json_encode($timestamps), LOCK_EX);
 }
 
+// Plain text fields — strip all tags and encode entities
+function sanitize_text(string $val): string {
+    return htmlspecialchars(strip_tags(trim($val)), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
+// Rich-text fields — strip only dangerous tags, keep safe formatting
+function sanitize_html(string $val): string {
+    $allowed = '<p><br><b><strong><i><em><ul><ol><li><h1><h2><h3><h4><a><blockquote><pre><code>';
+    return strip_tags(trim($val), $allowed);
+}
+
 function verify_recaptcha(string $token): bool {
     $secret = $_ENV['RECAPTCHA_SECRET_KEY'] ?? '';
     $ch = curl_init('https://www.google.com/recaptcha/api/siteverify');

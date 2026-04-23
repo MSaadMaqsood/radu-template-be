@@ -25,19 +25,10 @@ if (!$username || !$password) {
     exit;
 }
 
-// ⚠️ Vulnerable (for demo)
-// $query = "SELECT * FROM auth_users WHERE username = '' OR 1=1 -- ' AND password = 'anything';";
-$query = "SELECT * FROM auth_users WHERE username = '$username' AND password = '$password'";
-
-
-$result = $conn->query($query);
-
-if (!$result) {
-    echo json_encode(["error" => $conn->error]);
-    exit;
-}
-
-$user = $result->fetch_assoc();
+$stmt = $conn->prepare("SELECT * FROM auth_users WHERE username = ? AND password = ?");
+$stmt->bind_param("ss", $username, $password);
+$stmt->execute();
+$user = $stmt->get_result()->fetch_assoc();
 
 if ($user) {
     echo json_encode(["message" => "Login success"]);

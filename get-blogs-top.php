@@ -9,5 +9,5 @@ while ($row = $result->fetch_assoc()) {
     $data[] = $row;
 }
 
-echo json_encode($data);
+echo json_encode($data, JSON_HEX_TAG | JSON_HEX_AMP);
 ?>
