@@ -15,18 +15,19 @@ $description = sanitize_html($_POST['description'] ?? "");
 $imageName = null;
 
 if (isset($_FILES["image"])) {
+    validate_upload(
+        $_FILES['image'],
+        ['jpg', 'jpeg', 'png', 'webp'],
+        ['image/jpeg', 'image/png', 'image/webp']
+    );
+
     $targetDir = "./uploads/";
+    if (!is_dir($targetDir)) mkdir($targetDir, 0777, true);
 
-    if (!is_dir($targetDir)) {
-        mkdir($targetDir, 0777, true);
-    }
+    $ext       = strtolower(pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION));
+    $imageName = uniqid() . '.' . $ext;
 
-    $ext = pathinfo($_FILES["image"]["name"], PATHINFO_EXTENSION);
-    $imageName = uniqid() . "." . $ext;
-
-    $targetFile = $targetDir . $imageName;
-
-    move_uploaded_file($_FILES["image"]["tmp_name"], $targetFile);
+    move_uploaded_file($_FILES["image"]["tmp_name"], $targetDir . $imageName);
 }
 
 // Insert into DB

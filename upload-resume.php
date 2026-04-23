@@ -4,11 +4,16 @@ ini_set('display_errors', 1);
 
 $user_id = $_POST['user_id'];
 
-$targetDir = "./uploads/";
-$fileName = basename($_FILES["file"]["name"]);
+validate_upload(
+    $_FILES['file'],
+    ['pdf'],
+    ['application/pdf']
+);
+
+$targetDir  = "./uploads/";
+$fileName   = uniqid() . '.pdf';
 $targetFile = $targetDir . $fileName;
 
-// ❌ No validation (intentional for demo)
 move_uploaded_file($_FILES["file"]["tmp_name"], $targetFile);
 
 // Save file path in DB

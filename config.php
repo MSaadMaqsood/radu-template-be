@@ -45,6 +45,24 @@ function rate_limit(int $max = 30, int $window = 60): void {
     file_put_contents($file, json_encode($timestamps), LOCK_EX);
 }
 
+// Validates extension + actual MIME type; exits with 415 on failure
+function validate_upload(array $file, array $allowed_ext, array $allowed_mime): void {
+    $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    if (!in_array($ext, $allowed_ext, true)) {
+        http_response_code(415);
+        echo json_encode(["error" => "Extension not allowed. Accepted: " . implode(', ', $allowed_ext)]);
+        exit;
+    }
+    $finfo = finfo_open(FILEINFO_MIME_TYPE);
+    $mime  = finfo_file($finfo, $file['tmp_name']);
+    finfo_close($finfo);
+    if (!in_array($mime, $allowed_mime, true)) {
+        http_response_code(415);
+        echo json_encode(["error" => "File content does not match its extension."]);
+        exit;
+    }
+}
+
 // Plain text fields — strip all tags and encode entities
 function sanitize_text(string $val): string {
     return htmlspecialchars(strip_tags(trim($val)), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
