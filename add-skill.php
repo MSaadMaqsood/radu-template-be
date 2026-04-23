@@ -3,6 +3,11 @@ include "config.php";
 
 $data = json_decode(file_get_contents("php://input"), true);
 
+if (!verify_recaptcha($data['recaptcha_token'] ?? '')) {
+    echo json_encode(["error" => "reCAPTCHA verification failed"]);
+    exit;
+}
+
 if (!isset($data['user_id'])) {
     echo json_encode(["error" => "user_id required"]);
     exit;

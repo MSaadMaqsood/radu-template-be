@@ -8,16 +8,15 @@ if (!verify_recaptcha($data['recaptcha_token'] ?? '')) {
     exit;
 }
 
-$name = $data['name'];
-$email = $data['email'];
-$subject = $data['subject'];
-$message = $data['message'];
+$name    = $data['name']    ?? '';
+$email   = $data['email']   ?? '';
+$subject = $data['subject'] ?? '';
+$message = $data['message'] ?? '';
 
-// ❌ SQL Injection vulnerable
-$query = "INSERT INTO contacts (name, email, subject, message)
-VALUES ('$name', '$email', '$subject', '$message')";
+$stmt = $conn->prepare("INSERT INTO contacts (name, email, subject, message) VALUES (?, ?, ?, ?)");
+$stmt->bind_param("ssss", $name, $email, $subject, $message);
 
-if ($conn->query($query)) {
+if ($stmt->execute()) {
     echo json_encode(["message" => "Saved"]);
 } else {
     echo json_encode(["error" => $conn->error]);

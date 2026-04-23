@@ -4,6 +4,11 @@ ini_set('display_errors', 1);
 
 $data = json_decode(file_get_contents("php://input"), true);
 
+if (!verify_recaptcha($data['recaptcha_token'] ?? '')) {
+    echo json_encode(["error" => "reCAPTCHA verification failed"]);
+    exit;
+}
+
 if (!isset($data['id'])) {
     echo json_encode(["error" => "User ID required"]);
     exit;

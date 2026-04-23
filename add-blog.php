@@ -1,6 +1,11 @@
 <?php
 include "config.php";
 
+if (!verify_recaptcha($_POST['recaptcha_token'] ?? '')) {
+    echo json_encode(["error" => "reCAPTCHA verification failed"]);
+    exit;
+}
+
 $title = $_POST['title'] ?? "";
 $summary = $_POST['summary'] ?? "";
 $description = $_POST['description'] ?? "";
