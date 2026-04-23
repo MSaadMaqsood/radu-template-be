@@ -3,11 +3,17 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 include "config.php";
+rate_limit(5, 60);
 
 $data = json_decode(file_get_contents("php://input"), true);
 
 if (!$data) {
     echo json_encode(["error" => "No input received"]);
+    exit;
+}
+
+if (!verify_recaptcha($data['recaptcha_token'] ?? '')) {
+    echo json_encode(["error" => "reCAPTCHA verification failed"]);
     exit;
 }
 
