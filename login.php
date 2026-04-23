@@ -8,11 +8,13 @@ rate_limit(5, 60);
 $data = json_decode(file_get_contents("php://input"), true);
 
 if (!$data) {
+    http_response_code(400);
     echo json_encode(["error" => "No input received"]);
     exit;
 }
 
 if (!verify_recaptcha($data['recaptcha_token'] ?? '')) {
+    http_response_code(403);
     echo json_encode(["error" => "reCAPTCHA verification failed"]);
     exit;
 }
@@ -21,6 +23,7 @@ $username = $data['username'] ?? "";
 $password = $data['password'] ?? "";
 
 if (!$username || !$password) {
+    http_response_code(422);
     echo json_encode(["error" => "Missing username or password"]);
     exit;
 }
@@ -31,7 +34,9 @@ $stmt->execute();
 $user = $stmt->get_result()->fetch_assoc();
 
 if ($user) {
+    http_response_code(200);
     echo json_encode(["message" => "Login success"]);
 } else {
+    http_response_code(401);
     echo json_encode(["error" => "Invalid credentials"]);
 }
