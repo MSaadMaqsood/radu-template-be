@@ -70,7 +70,7 @@ function sanitize_text(string $val): string {
 
 // Rich-text fields — strip only dangerous tags, keep safe formatting
 function sanitize_html(string $val): string {
-    $allowed = '<p><br><b><strong><i><em><ul><ol><li><h1><h2><h3><h4><a><blockquote><pre><code>';
+    $allowed = '';
     return strip_tags(trim($val), $allowed);
 }
 

@@ -9,7 +9,18 @@ if (!verify_recaptcha($_POST['recaptcha_token'] ?? '')) {
 
 $title       = sanitize_text($_POST['title']       ?? "");
 $summary     = sanitize_text($_POST['summary']     ?? "");
-$description = sanitize_html($_POST['description'] ?? "");
+$description = sanitize_text($_POST['description'] ?? "");
+
+$missing = [];
+if ($title       === "") $missing[] = "title";
+if ($summary     === "") $missing[] = "summary";
+if ($description === "") $missing[] = "description";
+
+if (!empty($missing)) {
+    http_response_code(422);
+    echo json_encode(["error" => "Missing required fields: " . implode(', ', $missing)]);
+    exit;
+}
 
 // Handle image
 $imageName = null;
