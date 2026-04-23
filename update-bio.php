@@ -1,6 +1,7 @@
 <?php
 include "config.php";
 ini_set('display_errors', 1);
+rate_limit();
 
 $data = json_decode(file_get_contents("php://input"), true);
 

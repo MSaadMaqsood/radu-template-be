@@ -1,5 +1,6 @@
 <?php
 include "config.php";
+rate_limit();
 
 if (!verify_recaptcha($_POST['recaptcha_token'] ?? '')) {
     echo json_encode(["error" => "reCAPTCHA verification failed"]);

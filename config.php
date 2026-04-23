@@ -5,7 +5,8 @@ if (file_exists($envFile)) {
     foreach (file($envFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) as $line) {
         if (str_starts_with(trim($line), '#')) continue;
         [$key, $val] = explode('=', $line, 2);
-        $_ENV[trim($key)] = trim($val);
+        // Strip inline comments (e.g. value   # comment)
+        $_ENV[trim($key)] = trim(explode(' #', $val, 2)[0]);
     }
 }
 
@@ -22,6 +23,27 @@ if ($conn->connect_error) {
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json");
+
+// $max requests per IP within $window seconds; call at the top of every POST handler
+function rate_limit(int $max = 30, int $window = 60): void {
+    $ip  = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $dir = sys_get_temp_dir() . '/php_rl';
+    if (!is_dir($dir)) mkdir($dir, 0700, true);
+
+    $file       = $dir . '/' . md5($ip) . '.json';
+    $now        = time();
+    $timestamps = file_exists($file) ? (json_decode(file_get_contents($file), true) ?? []) : [];
+    $timestamps = array_values(array_filter($timestamps, fn($t) => $now - $t < $window));
+
+    if (count($timestamps) >= $max) {
+        http_response_code(429);
+        echo json_encode(["error" => "Too many requests. Please try again later."]);
+        exit;
+    }
+
+    $timestamps[] = $now;
+    file_put_contents($file, json_encode($timestamps), LOCK_EX);
+}
 
 function verify_recaptcha(string $token): bool {
     $secret = $_ENV['RECAPTCHA_SECRET_KEY'] ?? '';
